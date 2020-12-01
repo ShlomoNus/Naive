@@ -1,22 +1,35 @@
 const FleetService = require("./service");
-const getGeneralData = async (req,res) => {
+const getGeneralData = async (req, res) => {
+  try {
     const fleets = await FleetService.getGeneralData();
-    res.status(200).json({fleets:fleets})
+    res.status(200).json({ fleets: fleets });
+  } catch (error) {
+    res.status(404).json({ error: error.massage });
+  }
 };
 
-const getFleetVessels=(req,res) =>{
-  const id = req.params.id;
-  const vessels= await FleetService.getFleetsVessels(id);
-  res.status(200).json({vessels:vessels})
-}
+const getFleetVessels = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const vessels = await FleetService.getFleetsVessels(id);
+    res.status(200).json({ vessels: vessels });
+  } catch (error) {
+    res.status(404).json({ error: error.massage });
+  }
+};
 
-const getVesselByProperties = async(req,res) =>{
-  const {params} = req;
-  const matchVessels = await FleetService.getVesselByProperties(params);
-  res.status(200).json({vessels: matchVessels})
+const getVesselByProperties = async (req, res) => {
+  try {
+    const properties = req.body;
+    const matchVessels = await FleetService.getVesselsByProperties(properties);
+    res.status(200).json({ vessels: matchVessels });
+  } catch (error) {
+    res.status(404).json({ error: error.massage });
+  }
+};
 
-}
 module.exports = {
   getGeneralData,
-  getFleetVessels
+  getFleetVessels,
+  getVesselByProperties,
 };

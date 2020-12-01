@@ -9,7 +9,7 @@ const getAllFleets = async () => {
   return JSON.parse(allFleets);
 };
 
-const getFleetById =(id)=>{
+const getFleetById = async (id)=>{
   const allFleets=   await getAllFleets();
   const selectedFleet= allFleets.find(fleet=> fleet._id == id  )
   return selectedFleet;
