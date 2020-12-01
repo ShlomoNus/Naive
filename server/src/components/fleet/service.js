@@ -8,7 +8,8 @@ const getGeneralData = async () => {
     for (const fleet of data) {
       const fleetData = {
         name: fleet["name"],
-        length: fleet["vessels"].length,
+        vesselsCount: fleet["vessels"].length,
+        _id:fleet["_id"]
       };
       fleetsArray.push(fleetData);
     }
