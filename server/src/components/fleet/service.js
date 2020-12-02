@@ -24,13 +24,14 @@ const getFleetsVessels = async (id) => {
     const selectedFleet = await FleetRepository.getFleetById(id);
     const fleetsVessels = selectedFleet["vessels"];
     const allVessels = await vesselService.getAllVessels();
-    const vesselsFullData = [];
+    let vesselsFullData = [];
     for (const fleetsVessel of fleetsVessels) {
       const neededVessel = allVessels.find(
         (generalVessel) => generalVessel["_id"] === fleetsVessel["_id"]
       );
       vesselsFullData.push(neededVessel);
-    }
+    };
+    vesselsFullData= vesselService.attachVesselsLocation(vesselsFullData);
     return vesselsFullData;
   } catch (error) {
     throw Error(error);
@@ -42,7 +43,9 @@ const getVesselsByProperties = async (properties) => {
     const fleetId = properties["_id"];
     delete properties["_id"];
     const fleetsVessels = await getFleetsVessels(fleetId);
-    const matchedVessel = filterVesselsByProperties(fleetsVessels, properties);
+    let matchedVessel = filterVesselsByProperties(fleetsVessels, properties);
+    matchedVessel= await vesselService.attachVesselsLocation(matchedVessel);
+    console.log('xxxxx',matchedVessel);
     return matchedVessel;
   } catch (error) {
     throw Error(error);

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
@@ -16,7 +16,6 @@ const useStyle = makeStyles({
     justifyContent: "center",
   },
   paper: {
-    width: "50%",
   },
   link: {
     textDecoration: "none",
@@ -28,8 +27,10 @@ const useStyle = makeStyles({
 });
 
 export default function TableComp({ headers, rowsData, linkTo=null }) {
-  const classes = useStyle();
   
+  const classes = useStyle();
+  const [rowData,setRowData]=useState(rowsData);
+  const [sortProps,setSortProps]=useState({headerName:'', order:1});
   const headersCells = () =>
     headers.map((header, index) => (
       <TableCell key={index} >
@@ -39,7 +40,7 @@ export default function TableComp({ headers, rowsData, linkTo=null }) {
 
   const createCells = () => {
     const generatedCells = [];
-    for (const row of rowsData) {
+    for (const row of rowData) {
       let cells = headers.map((header, index) => (
         <TableCell  key={index}> {row[header]}</TableCell>
       ));
@@ -61,11 +62,32 @@ export default function TableComp({ headers, rowsData, linkTo=null }) {
   const renderRows = () => {
     const cellsLines = createCells();
     const rows = [];
+    let index = 0
     for (const line of cellsLines) {
-      rows.push(<TableRow> {line}</TableRow>);
+      rows.push(<TableRow key={index}> {line}</TableRow>);
+      index++
     }
     return rows;
   };
+
+  const comparatorData=(header)=>{
+    header==sortProps.headerName? setSortProps({...sortProps,order:sortProps.order * -1}) : setSortProps({headerName:header,order:1});
+  }
+  const comparator= (a,b) =>{
+    if(a[sortProps.headerName]<b[sortProps.headerName]){
+      return -1 *sortProps.order
+    }
+    if(a[sortProps.headerName]>b[sortProps.headerName]){
+      return 1 *sortProps.order
+    }
+    return 0;
+  }
+
+  const sortColumn =(header) =>{
+    comparatorData(header);
+    let sortedRowData = rowData.sort(comparator) ;
+    setRowData(sortedRowData);
+  }
   return (
     <div className={classes.compRoot}>
       <Paper className={classes.paper}>

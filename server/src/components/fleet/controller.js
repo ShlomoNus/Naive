@@ -20,7 +20,8 @@ const getFleetVessels = async (req, res) => {
 
 const getVesselByProperties = async (req, res) => {
   try {
-    const properties = req.body;
+    const properties = req.query;
+    console.log(properties);
     const matchVessels = await FleetService.getVesselsByProperties(properties);
     res.status(200).json({ vessels: matchVessels });
   } catch (error) {

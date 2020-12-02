@@ -9,5 +9,13 @@ const getAllVessels = async () => {
 
   }
 };
+ const attachVesselsLocation = async(vessels)=>{
+  const locations =  await vesselRepository.getAllVesselLocation();
+  for (const vessel of vessels) {
+    const  location =  locations.find(location => location['_id'] == vessel['_id']);
+    if(location) vessel['location']=location;
+  }
+  return vessels
+ } 
 
-module.exports = { getAllVessels };
+module.exports = { getAllVessels,attachVesselsLocation };
