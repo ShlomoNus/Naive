@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
@@ -8,15 +8,14 @@ import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
 import { makeStyles } from "@material-ui/core/styles";
 import { Link } from "react-router-dom";
-
+import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
 const useStyle = makeStyles({
   compRoot: {
     padding: "5%",
     display: "flex",
     justifyContent: "center",
   },
-  paper: {
-  },
+  
   link: {
     textDecoration: "none",
     color: "inherit",
@@ -24,19 +23,30 @@ const useStyle = makeStyles({
       textDecoration: "underline",
     },
   },
+  
 });
 
 export default function TableComp({ headers, rowsData, linkTo=null }) {
   
   const classes = useStyle();
-  const [rowData,setRowData]=useState(rowsData);
+  const classNames = {selected:' selected',desc:' desc selected'
+      }
+  const [rowData,setRowData]=useState([]);
   const [sortProps,setSortProps]=useState({headerName:'', order:1});
   const headersCells = () =>
     headers.map((header, index) => (
-      <TableCell key={index} >
-        {header}
+      <TableCell className='headerCell'  key={index} >
+        {header}<ArrowUpwardIcon onClick={() =>{sortColumn(header) }} className={`arrow${sortProps.headerName!==header?'': sortProps.order === -1?classNames.desc :classNames.selected}`} />
       </TableCell>
     ));
+    useEffect(() =>{
+      setRowData(rowsData)
+    },[rowsData])
+
+    useEffect( () =>{
+      let sortedRowData = [...rowData].sort(comparator) ;
+      setRowData(sortedRowData);
+    },[sortProps])
 
   const createCells = () => {
     const generatedCells = [];
@@ -54,7 +64,7 @@ export default function TableComp({ headers, rowsData, linkTo=null }) {
   const linkCells = (cells, row) => {
     const firstCell = cells.shift();
     const wrappedCell = (
-      <Link to={{ pathname: linkTo, state: row }}>{firstCell}</Link>
+      <Link className={classes.link} to={{ pathname: linkTo, state: row }}>{firstCell}</Link>
     );
     cells.unshift(wrappedCell);
     return cells;
@@ -85,13 +95,11 @@ export default function TableComp({ headers, rowsData, linkTo=null }) {
 
   const sortColumn =(header) =>{
     comparatorData(header);
-    let sortedRowData = rowData.sort(comparator) ;
-    setRowData(sortedRowData);
   }
   return (
     <div className={classes.compRoot}>
       <Paper className={classes.paper}>
-        <TableContainer>
+        <TableContainer style={{cursor:'default'}}>
           <Table aria-label="simple table">
             <TableHead>
               <TableRow>{headersCells()}</TableRow>

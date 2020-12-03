@@ -45,7 +45,6 @@ const getVesselsByProperties = async (properties) => {
     const fleetsVessels = await getFleetsVessels(fleetId);
     let matchedVessel = filterVesselsByProperties(fleetsVessels, properties);
     matchedVessel= await vesselService.attachVesselsLocation(matchedVessel);
-    console.log('xxxxx',matchedVessel);
     return matchedVessel;
   } catch (error) {
     throw Error(error);

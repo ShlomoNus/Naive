@@ -4,7 +4,7 @@
   box-sizing: border-box;
 }
 html{
-  background-color: powderblue;
+  background-color: #AFEEEE;
 
 }
 body {
@@ -21,3 +21,32 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.mapContainer{
+  display: flex;
+  justify-content: center;
+}
+.MuiFormLabel-root{
+  color: white;
+}
+.headerCell{
+  font-weight: bolder;
+}
+.headerCell .arrow{
+  visibility: hidden;  
+}
+.headerCell:hover .arrow{
+  visibility: visible;  
+  opacity: 0.5;
+}
+.headerCell .arrow.selected{
+  visibility: visible;  
+  opacity:1;
+  
+}
+
+.headerCell .arrow.selected.desc{
+  transform: rotate(180deg);
+}
+
+
