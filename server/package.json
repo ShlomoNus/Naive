@@ -19,9 +19,8 @@
     "nodemon": "^2.0.6"
   },
   "scripts": {
-    "dev-all":"concurrently \"yarn dev\"  \"cd ../client && yarn start \" ",
-    "start-all":"concurrently \" yarn server\" ",
-    "dev":"cd src && nodemon app.js"
+    "dev":"concurrently \"yarn dev-server\"  \"cd ../client && yarn start \" ",
+    "dev-server":"cd src && nodemon app.js"
     
   }
 }
