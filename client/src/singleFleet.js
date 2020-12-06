@@ -43,16 +43,20 @@ export default function SingleFleet() {
       const _id = location.state["_id"];
       const vessels = await Axios.get(`http://localhost:80/fleet/${_id}`);
       setVessels(vessels.data["vessels"]);
-      createLocation(vessels.data["vessels"]);
     };
     getVessels();
   }, []);
 
+  useEffect( () =>{
+    createLocation(vessels);
+
+  },[vessels])
+
   const updateFilter = (filterName, value) => {
-    setFilter({ ...filter, [filterName]: value });
+    setFilter({ ...filter, [filterName]: value.trim() });
   };
   const createLocation = (vessels) => {
-      if(!vessels) return;
+      if(!vessels || vessels.length <= 0) return;
     const locations = [];
     for (const vessel of vessels) {
       const location = {};
@@ -78,14 +82,11 @@ export default function SingleFleet() {
     for (const key in filter) {
         if(filter[key]) jsonBody[key] = filter[key]
     }
-    setFilter(defaultFilter);
     const response = await Axios.get("http://localhost:80/fleet/vessels", {
       params: jsonBody,
     });
     const vessels = response["data"]["vessels"];
     setVessels(vessels);
-    if(Array.isArray(vessels))return;
-    createLocation(vessels);
   };
 
   return (
