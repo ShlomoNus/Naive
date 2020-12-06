@@ -56,7 +56,8 @@ export default function SingleFleet() {
     setFilter({ ...filter, [filterName]: value.trim() });
   };
   const createLocation = (vessels) => {
-      if(!vessels || vessels.length <= 0) return;
+      if(!vessels || vessels.length <= 0) {setLocations([])
+      return};
     const locations = [];
     for (const vessel of vessels) {
       const location = {};
