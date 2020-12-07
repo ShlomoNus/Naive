@@ -1,7 +1,7 @@
 const FleetService = require("./service");
-const getGeneralData = async (req, res) => {
+const getFleets = async (req, res) => {
   try {
-    const fleets = await FleetService.getGeneralData();
+    const fleets = await FleetService.getGeneralFleetsInfo();
     res.status(200).json({ fleets: fleets });
   } catch (error) {
     res.status(404).json({ error: error.massage });
@@ -21,7 +21,6 @@ const getFleetVessels = async (req, res) => {
 const getVesselByProperties = async (req, res) => {
   try {
     const properties = req.query;
-    console.log(properties);
     const matchVessels = await FleetService.getVesselsByProperties(properties);
     res.status(200).json({ vessels: matchVessels });
   } catch (error) {
@@ -30,7 +29,7 @@ const getVesselByProperties = async (req, res) => {
 };
 
 module.exports = {
-  getGeneralData,
+  getFleets,
   getFleetVessels,
   getVesselByProperties,
 };

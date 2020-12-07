@@ -1,19 +1,10 @@
 const FleetRepository = require("./repository");
 const vesselService = require("../vessel/service");
 
-const getGeneralData = async () => {
+const getGeneralFleetsInfo = async () => {
   try {
-    const data = await FleetRepository.getAllFleets();
-    const fleetsArray = [];
-    for (const fleet of data) {
-      const fleetData = {
-        name: fleet["name"],
-        vesselsCount: fleet["vessels"].length,
-        _id:fleet["_id"]
-      };
-      fleetsArray.push(fleetData);
-    }
-    return fleetsArray;
+    const generalInfo = await FleetRepository.getGeneralFleetsInfo();
+    return generalInfo;
   } catch (error) {
     throw Error(error);
   }
@@ -21,6 +12,9 @@ const getGeneralData = async () => {
 
 const getFleetsVessels = async (id) => {
   try {
+    const vesselsData = await FleetRepository.getFleetVesselsByID(id);
+   return vesselsData;  
+  } catch (error) {
     const selectedFleet = await FleetRepository.getFleetById(id);
     const fleetsVessels = selectedFleet["vessels"];
     const allVessels = await vesselService.getAllVessels();
@@ -30,11 +24,10 @@ const getFleetsVessels = async (id) => {
         (generalVessel) => generalVessel["_id"] === fleetsVessel["_id"]
       );
       vesselsFullData.push(neededVessel);
-    };
-    vesselsFullData= vesselService.attachVesselsLocation(vesselsFullData);
-    return vesselsFullData;
-  } catch (error) {
-    throw Error(error);
+    }
+    vesselsFullData = vesselService.attachVesselsLocation(vesselsFullData);
+   const fleet= {'_id':id,'vessels':vesselsFullData}
+    return fleet;
   }
 };
 
@@ -44,7 +37,7 @@ const getVesselsByProperties = async (properties) => {
     delete properties["_id"];
     const fleetsVessels = await getFleetsVessels(fleetId);
     let matchedVessel = filterVesselsByProperties(fleetsVessels, properties);
-    matchedVessel= await vesselService.attachVesselsLocation(matchedVessel);
+    matchedVessel = await vesselService.attachVesselsLocation(matchedVessel);
     return matchedVessel;
   } catch (error) {
     throw Error(error);
@@ -60,4 +53,8 @@ const filterVesselsByProperties = (vessels, properties) => {
   return vessels;
 };
 
-module.exports = { getGeneralData, getFleetsVessels, getVesselsByProperties };
+module.exports = {
+  getGeneralFleetsInfo,
+  getFleetsVessels,
+  getVesselsByProperties,
+};
