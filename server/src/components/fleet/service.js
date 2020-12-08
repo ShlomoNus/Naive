@@ -1,5 +1,4 @@
 const fleetRepository = require("./repository");
-const vesselService = require("../vessel/service");
 
 const generalInfo = [];
 
