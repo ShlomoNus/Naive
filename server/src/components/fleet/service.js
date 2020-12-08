@@ -1,56 +1,80 @@
-const FleetRepository = require("./repository");
+const fleetRepository = require("./repository");
 const vesselService = require("../vessel/service");
+
+const generalInfo = [];
+
+const vesselsByFleetBeta = new Map();
+
+const vesselsByFleet = new Map();
 
 const getGeneralFleetsInfo = async () => {
   try {
-    const generalInfo = await FleetRepository.getGeneralFleetsInfo();
+    if (generalInfo.length > 0) return generalInfo;
+    const fleets = await fleetRepository.getFleets();
+    for (const fleet of fleets) {
+      const fleetData = {
+        name: fleet["name"],
+        vesselsCount: fleet["vessels"].length,
+        _id: fleet["_id"],
+      };
+      generalInfo.push(fleetData);
+      const vessels = [];
+      for (const vessel of fleet["vessels"]) {
+        vessels.push(vessel["_id"]);
+      }
+      vesselsByFleetBeta.set(fleet["_id"], vessels);
+    }
     return generalInfo;
   } catch (error) {
     throw Error(error);
   }
 };
-
+const getVesselFullData = async (id) => {
+  const allVessels = await fleetRepository.getAllVessels();
+  const vesselFullData = allVessels.find((v) => v["_id"] == id);
+  const picked = (({
+    name,
+    mmsi,
+    imo,
+    flag,
+    vessel_class,
+    size,
+    number_of_blips,
+  }) => ({ name, mmsi, imo, flag, vessel_class, size, number_of_blips }))(
+    vesselFullData
+  );
+  return picked;
+};
+const getVesselLocation = async (id) => {
+  const allLocations = await fleetRepository.getAllVesselLocation();
+  const location = allLocations.find((l) => l["_id"] == id);
+  return location["lastpos"]["geometry"]["coordinates"];
+};
 const getFleetsVessels = async (id) => {
-  try {
-    const vesselsData = await FleetRepository.getFleetVesselsByID(id);
-   return vesselsData;  
-  } catch (error) {
-    const selectedFleet = await FleetRepository.getFleetById(id);
-    const fleetsVessels = selectedFleet["vessels"];
-    const allVessels = await vesselService.getAllVessels();
-    let vesselsFullData = [];
-    for (const fleetsVessel of fleetsVessels) {
-      const neededVessel = allVessels.find(
-        (generalVessel) => generalVessel["_id"] === fleetsVessel["_id"]
-      );
-      vesselsFullData.push(neededVessel);
-    }
-    vesselsFullData = vesselService.attachVesselsLocation(vesselsFullData);
-   const fleet= {'_id':id,'vessels':vesselsFullData}
-    return fleet;
+  if (vesselsByFleet.get(id)) return vesselsByFleet.get(id);
+  const fleetVessels = vesselsByFleetBeta.get(id);
+  const vesselsList = [];
+  for (const vesselId of fleetVessels) {
+    const vesselFullData = await getVesselFullData(vesselId);
+    const location = await getVesselLocation(vesselId);
+    vesselFullData["location"] = location;
+    vesselsList.push(vesselFullData);
   }
+  vesselsByFleet.set([id, vesselsList]);
+  return vesselsList;
 };
 
-const getVesselsByProperties = async (properties) => {
+const getVesselsByProperties = async (id, properties) => {
   try {
-    const fleetId = properties["_id"];
-    delete properties["_id"];
-    const fleetsVessels = await getFleetsVessels(fleetId);
-    let matchedVessel = filterVesselsByProperties(fleetsVessels, properties);
-    matchedVessel = await vesselService.attachVesselsLocation(matchedVessel);
-    return matchedVessel;
+    let vessels = [...vesselsByFleet(id)];
+    const keys = Object.keys(properties);
+    for (const key of keys) {
+      vessels = vessels.filter(vessel => vessel[key] == properties[key]);
+    }
+    return vessels;
   } catch (error) {
     throw Error(error);
   }
-};
-
-const filterVesselsByProperties = (vessels, properties) => {
-  const keys = Object.keys(properties);
-
-  for (const key of keys) {
-    vessels = vessels.filter((vessel) => vessel[key] == properties[key]);
-  }
-  return vessels;
 };
 
 module.exports = {
