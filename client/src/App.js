@@ -20,7 +20,7 @@ export default function App() {
     <div className="App">
     <Switch>
     
-    {/* <Route path='/single' exact component={SingleFleet} />*/}
+    <Route path='/single/:id' exact component={SingleFleet} />
     <Route path='/' exact component={FleetsTable} /> 
     </Switch>
     </div>

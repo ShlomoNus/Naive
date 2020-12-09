@@ -4,12 +4,12 @@ import TableComp from "./tableComp";
 import { Button, TextField } from "@material-ui/core";
 import DirectionsBoatIcon from "@material-ui/icons/DirectionsBoat";
 import ReactMapGL, { Marker, Popup } from "react-map-gl";
-import { useLocation } from "react-router-dom";
-import ClickAwayListener from '@material-ui/core/ClickAwayListener';
+import { useParams } from "react-router-dom";
+import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 
 export default function SingleFleet() {
-  //router-location
-  const location = useLocation();
+  //router-params
+  const params = useParams();
 
   //default states
   const defaultFilter = { name: "", flag: "", mmsi: "" };
@@ -40,52 +40,45 @@ export default function SingleFleet() {
   // fetching data
   useEffect(() => {
     const getVessels = async () => {
-      const _id = location.state["_id"];
+      const _id = params.id;
       const vessels = await Axios.get(`http://localhost:80/fleet/${_id}`);
       setVessels(vessels.data["vessels"]);
     };
     getVessels();
   }, []);
 
-  useEffect( () =>{
+  useEffect(() => {
     createLocation(vessels);
-
-  },[vessels])
+  }, [vessels]);
 
   const updateFilter = (filterName, value) => {
     setFilter({ ...filter, [filterName]: value.trim() });
   };
   const createLocation = (vessels) => {
-      if(!vessels || vessels.length <= 0) {setLocations([])
-      return};
+    if (!vessels || vessels.length === 0) {
+      setLocations([]);
+      return;
+    }
     const locations = [];
     for (const vessel of vessels) {
-      const location = {};
-
-      location["_id"] = vessel["_id"];
-      location["name"] = vessel["name"];
-      location["flag"] = vessel["flag"];
-      location["mmsi"] = vessel["name"];
-      location["ts"] = vessel["location"]["ts"];
-      location["latitude"] = vessel["location"]["coordinates"]["lat"];
-      location["longitude"] = vessel["location"]["coordinates"]["lon"];
+      const location = (({name,flag,mmsi,location}) => ({ name,flag,mmsi,location }))(vessel)
       locations.push(location);
     }
     setLocations(locations);
-    const latitude = locations[0]["latitude"];
-    const longitude = locations[0]["longitude"];
+    const longitude = locations[0]['location'][0];
+    const latitude = locations[0]['location'][1];
     setViewport({ ...viewport, latitude, longitude });
   };
   const filterVessels = async () => {
     if (Object.is(defaultFilter, filter)) return;
     const jsonBody = {};
-    jsonBody["_id"] = location.state["_id"];
     for (const key in filter) {
-        if(filter[key]) jsonBody[key] = filter[key]
+      if (filter[key]) jsonBody[key] = filter[key];
     }
-    const response = await Axios.get("http://localhost:80/fleet/vessels", {
+    const response = await Axios.get(`http://localhost:80/fleet/filter/${params.id}`, {
       params: jsonBody,
     });
+    console.log();
     const vessels = response["data"]["vessels"];
     setVessels(vessels);
   };
@@ -113,7 +106,7 @@ export default function SingleFleet() {
         />
         <Button
           variant="contained"
-          style={{marginTop:'10px',marginLeft:'10px'}}
+          style={{ marginTop: "10px", marginLeft: "10px" }}
           onClick={() => {
             filterVessels();
           }}
@@ -129,22 +122,18 @@ export default function SingleFleet() {
             setViewport(viewport);
           }}
           {...viewport}
-          mapboxApiAccessToken={
-            process.env.REACT_APP_TOKEN
-          }
+          mapboxApiAccessToken={process.env.REACT_APP_TOKEN}
         >
           {locations.map((location) => (
             <Marker
               key={location._id}
-              latitude={location.latitude}
-              longitude={location.longitude}
+              longitude={location['location'][0]}
+              latitude={location['location'][1]}
             >
               {
                 <DirectionsBoatIcon
                   onClick={() => {
-                    const copy= location;
-                    delete copy._id
-                    setSelectedLocation(copy);
+                    setSelectedLocation(location);
                   }}
                   style={{ color: "#fff", cursor: "pointer" }}
                 />
@@ -152,11 +141,10 @@ export default function SingleFleet() {
             </Marker>
           ))}
           {selectedLocation ? (
-            <ClickAwayListener onClickAway={() =>setSelectedLocation(null)} >
+            <ClickAwayListener onClickAway={() => setSelectedLocation(null)}>
               <Popup
-               
-                latitude={selectedLocation.latitude}
-                longitude={selectedLocation.longitude}
+                longitude={selectedLocation['location'][0]}
+                latitude={selectedLocation['location'][1]}
               >
                 {Object.entries(selectedLocation).map((pair) => (
                   <div>

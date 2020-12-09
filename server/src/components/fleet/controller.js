@@ -22,7 +22,7 @@ const getVesselByProperties = async (req, res) => {
   try {
     const id = req.params.id;
     const properties = req.query;
-    const matchVessels = await FleetService.getVesselsByProperties(properties);
+    const matchVessels = await FleetService.getVesselsByProperties(id,properties);
     res.status(200).json({ vessels: matchVessels });
   } catch (error) {
     res.status(404).json({ error: error.massage });

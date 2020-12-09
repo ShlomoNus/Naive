@@ -64,7 +64,7 @@ export default function TableComp({ headers, rowsData, linkTo=null }) {
   const linkCells = (cells, row) => {
     const firstCell = cells.shift();
     const wrappedCell = (
-      <Link className={classes.link} to={{ pathname: linkTo, state: row }}>{firstCell}</Link>
+      <Link className={classes.link} to={`${linkTo}/${row['_id']}`}>{firstCell}</Link>
     );
     cells.unshift(wrappedCell);
     return cells;

@@ -10,7 +10,7 @@ export default function FleetsTable() {
 
   return (
     <div>
-     <TableComp headers={headers} rowsData={fleetsData.fleets} linkTo='/single' />
+     <TableComp headers={headers} rowsData={fleetsData.fleets} linkTo='/single'/>
     </div>
   );
 }

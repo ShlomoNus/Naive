@@ -2,9 +2,9 @@ const fleetRepository = require("./repository");
 
 const generalInfo = [];
 
-const vesselsByFleetBeta = new Map();
+const vesselsByFleetBeta = {};
 
-const vesselsByFleet = new Map();
+const vesselsByFleet = {};
 
 const getGeneralFleetsInfo = async () => {
   try {
@@ -21,7 +21,8 @@ const getGeneralFleetsInfo = async () => {
       for (const vessel of fleet["vessels"]) {
         vessels.push(vessel["_id"]);
       }
-      vesselsByFleetBeta.set(fleet["_id"], vessels);
+      const _id = fleet["_id"];
+      vesselsByFleetBeta[_id]= vessels
     }
     return generalInfo;
   } catch (error) {
@@ -33,13 +34,14 @@ const getVesselFullData = async (id) => {
   const vesselFullData = allVessels.find((v) => v["_id"] == id);
   const picked = (({
     name,
+    _id,
     mmsi,
     imo,
     flag,
     vessel_class,
     size,
     number_of_blips,
-  }) => ({ name, mmsi, imo, flag, vessel_class, size, number_of_blips }))(
+  }) => ({ name,_id, mmsi, imo, flag, vessel_class, size, number_of_blips }))(
     vesselFullData
   );
   return picked;
@@ -50,8 +52,9 @@ const getVesselLocation = async (id) => {
   return location["lastpos"]["geometry"]["coordinates"];
 };
 const getFleetsVessels = async (id) => {
-  if (vesselsByFleet.get(id)) return vesselsByFleet.get(id);
-  const fleetVessels = vesselsByFleetBeta.get(id);
+  if (vesselsByFleet[id]) return vesselsByFleet[id];
+  
+  const fleetVessels = vesselsByFleetBeta[id];
   const vesselsList = [];
   for (const vesselId of fleetVessels) {
     const vesselFullData = await getVesselFullData(vesselId);
@@ -59,16 +62,17 @@ const getFleetsVessels = async (id) => {
     vesselFullData["location"] = location;
     vesselsList.push(vesselFullData);
   }
-  vesselsByFleet.set([id, vesselsList]);
+  vesselsByFleet[id] = vesselsList;
   return vesselsList;
 };
 
-const getVesselsByProperties = async (id, properties) => {
+const getVesselsByProperties =  (id, properties) => {
   try {
-    let vessels = [...vesselsByFleet(id)];
+    let vessels=  vesselsByFleet[id]
     const keys = Object.keys(properties);
     for (const key of keys) {
-      vessels = vessels.filter(vessel => vessel[key] == properties[key]);
+      vessels = vessels.filter(vessel => {
+        return vessel[key] == properties[key]});
     }
     return vessels;
   } catch (error) {
