@@ -117,7 +117,45 @@ export default function SingleFleet() {
       </form>
       <TableComp headers={headers} rowsData={vessels} />
       <div className="mapContainer">
-    
+     {  locations? <ReactMapGL
+          mapStyle="mapbox://styles/shlomon/cki7y1r61b03f19oyca7zfwof"
+          onViewportChange={(viewport) => {
+            setViewport(viewport);
+          }}
+          {...viewport}
+          mapboxApiAccessToken={process.env.REACT_APP_TOKEN}
+        >
+          {locations.map((location) => (
+            <Marker
+              key={location._id}
+              longitude={location['longitude']}
+              latitude={location['latitude']}
+            >
+              {
+                <DirectionsBoatIcon
+                  onClick={() => {
+                    setSelectedLocation(location);
+                  }}
+                  style={{ color: "#fff", cursor: "pointer" }}
+                />
+              }
+            </Marker>
+          ))}
+          {selectedLocation ? (
+            <ClickAwayListener onClickAway={() => setSelectedLocation(null)}>
+              <Popup
+                longitude={selectedLocation['longitude']}
+                latitude={selectedLocation['latitude']}
+              >
+                {Object.entries(selectedLocation).map((pair) => (
+                  <div>
+                    {pair[0]} : {pair[1]}
+                  </div>
+                ))}
+              </Popup>
+            </ClickAwayListener>
+          ) : null}
+        </ReactMapGL> : null}
       </div>
     </div>
   );
