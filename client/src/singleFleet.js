@@ -29,8 +29,7 @@ export default function SingleFleet() {
   ];
   const [vessels, setVessels] = useState([]);
   const [viewport, setViewport] = useState({
-    latitude: 29.11272239685059,
-    longitude: 36.62507247924805,
+  
     width: "90%",
     height: "100vh",
     zoom: 5,
@@ -61,13 +60,15 @@ export default function SingleFleet() {
     }
     const locations = [];
     for (const vessel of vessels) {
-      const location = (({name,flag,mmsi,location}) => ({ name,flag,mmsi,location }))(vessel)
+      const location = (({name,flag,mmsi}) => ({ name,flag,mmsi }))(vessel)
+       location['longitude'] = vessel['location'][0];
+       location ['latitude'] = vessel['location'][1];
       locations.push(location);
     }
     setLocations(locations);
-    const longitude = locations[0]['location'][0];
-    const latitude = locations[0]['location'][1];
-    setViewport({ ...viewport, latitude, longitude });
+    const longitude= locations[0]['longitude']
+    const latitude= locations[0]['latitude']
+    setViewport({ ...viewport, longitude,latitude });
   };
   const filterVessels = async () => {
     if (Object.is(defaultFilter, filter)) return;
@@ -116,7 +117,7 @@ export default function SingleFleet() {
       </form>
       <TableComp headers={headers} rowsData={vessels} />
       <div className="mapContainer">
-        <ReactMapGL
+     {  locations? <ReactMapGL
           mapStyle="mapbox://styles/shlomon/cki7y1r61b03f19oyca7zfwof"
           onViewportChange={(viewport) => {
             setViewport(viewport);
@@ -127,8 +128,8 @@ export default function SingleFleet() {
           {locations.map((location) => (
             <Marker
               key={location._id}
-              longitude={location['location'][0]}
-              latitude={location['location'][1]}
+              longitude={location['longitude']}
+              latitude={location['latitude']}
             >
               {
                 <DirectionsBoatIcon
@@ -143,8 +144,8 @@ export default function SingleFleet() {
           {selectedLocation ? (
             <ClickAwayListener onClickAway={() => setSelectedLocation(null)}>
               <Popup
-                longitude={selectedLocation['location'][0]}
-                latitude={selectedLocation['location'][1]}
+                longitude={selectedLocation['longitude']}
+                latitude={selectedLocation['latitude']}
               >
                 {Object.entries(selectedLocation).map((pair) => (
                   <div>
@@ -154,7 +155,7 @@ export default function SingleFleet() {
               </Popup>
             </ClickAwayListener>
           ) : null}
-        </ReactMapGL>
+        </ReactMapGL> : null}
       </div>
     </div>
   );
